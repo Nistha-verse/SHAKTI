@@ -1,2 +1,1 @@
-# SHAKTI
-Hackculture project 
+# SHAK 
