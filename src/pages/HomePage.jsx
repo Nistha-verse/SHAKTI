@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import logo from '../assets/shakti-logo.svg';
+import logo from '../assets/logo.png';
 import PageShell from '../components/PageShell.jsx';
 import { useLanguage } from '../providers/LanguageProvider.jsx';
 

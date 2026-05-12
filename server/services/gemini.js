@@ -1,6 +1,7 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 
-const MODEL_ID = 'gemini-1.5-flash';
+
+const MODEL_ID = 'gemini-2.5-flash';
 
 const LANGUAGE_NAMES = {
   en: 'English',
@@ -68,25 +69,27 @@ function normalizeLanguageCode(code) {
   return LANGUAGE_NAMES[c] ? c : 'en';
 }
 
-function toGeminiHistoryRows(messages) {
-  const rows = [];
-  for (const m of messages) {
-    const role = m.role === 'user' ? 'user' : 'model';
-    rows.push({
-      role,
-      parts: [{ text: String(m.content ?? '') }],
-    });
+function buildFullPrompt({ language, historyMessages, userMessage }) {
+  const langCode = normalizeLanguageCode(language);
+  const langName = LANGUAGE_NAMES[langCode];
+  
+  let conversationHistory = '';
+  for (const msg of historyMessages) {
+    const role = msg.role === 'user' ? 'User' : 'Sakhi';
+    conversationHistory += `${role}: ${msg.content}\n`;
   }
-  return rows;
-}
+  
+  return `${SYSTEM_INSTRUCTION}
 
-/**
- * Gemini chat history must start with a user turn. Drops leading model messages if any.
- */
-function sanitizeGeminiHistory(history) {
-  let i = 0;
-  while (i < history.length && history[i].role !== 'user') i += 1;
-  return history.slice(i);
+Selected session language code: ${langCode} (${langName}).
+You must write your entire reply in ${langName} (${langCode}), including any reassurance or disclaimers.
+
+Previous conversation:
+${conversationHistory || '(No previous conversation)'}
+
+User: ${userMessage}
+
+Sakhi (reply in ${langName}):`;
 }
 
 export async function generateSakhiReply({ language, historyMessages, userMessage }) {
@@ -97,32 +100,31 @@ export async function generateSakhiReply({ language, historyMessages, userMessag
     throw err;
   }
 
-  const langCode = normalizeLanguageCode(language);
-  const langName = LANGUAGE_NAMES[langCode];
+  const prompt = buildFullPrompt({ language, historyMessages, userMessage });
 
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
-    model: MODEL_ID,
-    systemInstruction: `${SYSTEM_INSTRUCTION}
-
-Selected session language code: ${langCode} (${langName}).
-You must write your entire reply in ${langName} (${langCode}), including any reassurance or disclaimers.`,
-  });
-
-  const history = sanitizeGeminiHistory(toGeminiHistoryRows(historyMessages));
-
-  const chat = model.startChat({ history });
-
-  const wrappedUserText = `[Reply in ${langName} only]\n\n${userMessage}`;
-
-  const result = await chat.sendMessage(wrappedUserText);
-  const text = result.response.text();
-
-  if (!text || !String(text).trim()) {
-    const err = new Error('Empty response from language model');
-    err.statusCode = 502;
-    throw err;
+  try {
+    const ai = new GoogleGenAI({ apiKey });
+    
+    const response = await ai.models.generateContent({
+      model: MODEL_ID,
+      contents: prompt,
+      config: {
+        temperature: 0.7,
+        maxOutputTokens: 800,
+      },
+    });
+    
+    const text = response.text;
+    
+    if (!text || !String(text).trim()) {
+      const err = new Error('Empty response from language model');
+      err.statusCode = 502;
+      throw err;
+    }
+    
+    return String(text).trim();
+  } catch (error) {
+    console.error('[Gemini API Error]', error.message);
+    throw error;
   }
-
-  return String(text).trim();
 }
