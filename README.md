@@ -1,16 +1,13 @@
-# React + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+# Astra Shakti – By a woman, for a woman, to a woman. 
+Shakti is a women‑led health platform providing shame‑free, private health information and product access. 
+# Features: 
+Sakhi AI chatbot (6 languages: English, Hindi, Tamil, Telugu, Bengali, Marathi), conversation memory, Map of Care (10+ sample locations for pads/clinics/camps), and Request Help (generates 6‑digit OTP for free product pickup). 
+# Live demo: 
+https://shakti-frontend.onrender.com. 
+# Tech stack: 
+React frontend, Node.js + Express backend, Supabase database, Gemini API, deployed on Render (free tier). 
+# Setup: 
+clone repo, `cd server && npm install && node server.js`, then `cd ../src && npm install && npm run dev`. 
+# Environment variables in `server/.env`:
+`GEMINI_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`. 
+# MIT license.
